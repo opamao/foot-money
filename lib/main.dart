@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:footmoney/src/features/splash/spalsh.dart';
 import 'package:footmoney/src/themes/themes.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:sizer/sizer.dart';
@@ -23,7 +24,7 @@ class MyApp extends StatelessWidget {
           useMaterial3: true,
           textTheme: GoogleFonts.inriaSerifTextTheme(),
         ),
-        home: Container(),
+        home: const SplashPage(),
       );
     });
   }
