@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:footmoney/src/themes/themes.dart';
 import 'package:sizer/sizer.dart';
 
 class InputText extends StatelessWidget {
@@ -39,7 +40,7 @@ class InputText extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        border: borderColor != null ? Border.all(color: borderColor!) : null,
+        border: borderColor == null ? Border.all(color: appBlack) : null,
         borderRadius: BorderRadius.circular(2.w),
       ),
       //padding: EdgeInsets.symmetric(horizontal: 2.w),

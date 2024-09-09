@@ -3,7 +3,8 @@ class AppConstants {
 
   static const appName = "Foot Money";
 
-  static const btnLogin = "Connexion";
+  static const btnLogin = "Se connecter";
+  static const btnRegister = "S'enregistrer";
   static const btnValid = "Valider";
   static const btnContinue = "Continuer";
   static const btnCancel = "Annuler";
