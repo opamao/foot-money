@@ -7,6 +7,7 @@ import 'package:sizer/sizer.dart';
 
 import '../../../widgets/widgets.dart';
 import '../../forgot/forgot.dart';
+import '../../menus/menus.dart';
 import '../../register/register.dart';
 
 class LoginPage extends StatefulWidget {
@@ -117,6 +118,12 @@ class _LoginPageState extends State<LoginPage> {
                             AppConstants.btnLogin,
                             onPressed: () async {
                               if (_formKey.currentState!.validate()) {
+                                Navigator.of(context).pushAndRemoveUntil(
+                                  MaterialPageRoute(
+                                    builder: (context) => const MenuPage(),
+                                  ),
+                                      (route) => false,
+                                );
                               } else {
                                 ScaffoldMessenger.of(context)
                                     .showSnackBar(_snackBar);
