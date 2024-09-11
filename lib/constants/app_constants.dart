@@ -11,6 +11,6 @@ class AppConstants {
   static const btnBack = "Retour";
   static const btnUpdate = "Mettre tout à jour";
   static const btnUp = "Mettre à jour";
-  static const btnBenef = "Enregistrer le bénéficiaire";
-  static const btnClear = "Vider";
+  static const btnDons = "Faire un don";
+  static const btnMatch = "Homme du match";
 }

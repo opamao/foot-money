@@ -19,7 +19,7 @@ dependencies:
   intl_phone_number_input: ^0.7.4
   modal_bottom_sheet: ^3.0.0
   shared_preferences: ^2.3.2
-  fl_chart: ^0.69.0
+  pie_chart: ^5.4.0
 
 dev_dependencies:
   flutter_test:
@@ -39,3 +39,8 @@ flutter:
     - assets/images/ligue.png
     - assets/images/africa.png
     - assets/images/olympique.png
+    - assets/images/joueur.png
+    - assets/images/wave.jpeg
+    - assets/images/moov.png
+    - assets/images/orange.png
+    - assets/images/mtn.png

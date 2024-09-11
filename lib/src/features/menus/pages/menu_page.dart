@@ -29,7 +29,7 @@ class _MenuPageState extends State<MenuPage> {
         automaticallyImplyLeading: false,
         leading: Padding(
           padding: EdgeInsets.all(4.w),
-          child: Image.asset("assets/images/logoblue.png"),
+          child: Image.asset("assets/images/ligue.png"),
         ),
         actions: [
           Padding(
