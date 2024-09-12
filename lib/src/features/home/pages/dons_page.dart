@@ -248,6 +248,50 @@ class _DonsPageState extends State<DonsPage> {
           ),
         ),
       ),
+      bottomNavigationBar: Padding(
+        padding: EdgeInsets.all(4.w),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ClipRRect(
+              borderRadius: const BorderRadius.all(Radius.circular(5)),
+              child: Image.asset(
+                "assets/images/wave.jpeg",
+                height: 20,
+                width: 20,
+              ),
+            ),
+            Gap(2.w),
+            ClipRRect(
+              borderRadius: const BorderRadius.all(Radius.circular(5)),
+              child: Image.asset(
+                "assets/images/orange.png",
+                height: 20,
+                width: 20,
+              ),
+            ),
+            Gap(2.w),
+            ClipRRect(
+              borderRadius: const BorderRadius.all(Radius.circular(5)),
+              child: Image.asset(
+                "assets/images/mtn.png",
+                height: 20,
+                width: 20,
+              ),
+            ),
+            Gap(2.w),
+            ClipRRect(
+              borderRadius: const BorderRadius.all(Radius.circular(5)),
+              child: Image.asset(
+                "assets/images/moov.png",
+                height: 20,
+                width: 20,
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }
