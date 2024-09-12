@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:footmoney/main.dart';
 import 'package:footmoney/src/themes/themes.dart';
 import 'package:gap/gap.dart';
+import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 import 'package:sizer/sizer.dart';
+
+import '../actualite.dart';
 
 class ActualitePage extends StatefulWidget {
   const ActualitePage({super.key});
@@ -34,31 +36,44 @@ class _ActualitePageState extends State<ActualitePage> {
           padding: EdgeInsets.all(4.w),
           child: Column(
             children: [
-              Card(
-                elevation: 5,
-                child: Column(
-                  children: [
-                    ClipRRect(
-                      borderRadius: const BorderRadius.all(Radius.circular(15)),
-                      child: Image.asset(
-                        newsArticles[0]["image"]!,
-                        height: 219,
-                        width: double.infinity,
-                        fit: BoxFit.cover,
-                      ),
-                    ),
-                    Padding(
-                      padding: EdgeInsets.all(2.w),
-                      child: Text(
-                        newsArticles[0]["title"]!,
-                        style: TextStyle(
-                          color: appBlack,
-                          fontSize: 20,
-                          fontWeight: FontWeight.normal,
+              GestureDetector(
+                onTap: () => showBarModalBottomSheet(
+                  expand: true,
+                  context: context,
+                  barrierColor: appColor,
+                  builder: (context) => DetailActualitePage(
+                    image: newsArticles[0]["image"]!,
+                    titre: newsArticles[0]["title"]!,
+                    contenu: newsArticles[0]["content"]!,
+                  ),
+                ),
+                child: Card(
+                  elevation: 5,
+                  child: Column(
+                    children: [
+                      ClipRRect(
+                        borderRadius:
+                            const BorderRadius.all(Radius.circular(15)),
+                        child: Image.asset(
+                          newsArticles[0]["image"]!,
+                          height: 219,
+                          width: double.infinity,
+                          fit: BoxFit.cover,
                         ),
                       ),
-                    ),
-                  ],
+                      Padding(
+                        padding: EdgeInsets.all(2.w),
+                        child: Text(
+                          newsArticles[0]["title"]!,
+                          style: TextStyle(
+                            color: appBlack,
+                            fontSize: 20,
+                            fontWeight: FontWeight.normal,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
               Gap(3.h),
@@ -67,28 +82,40 @@ class _ActualitePageState extends State<ActualitePage> {
                   itemCount: newsArticles.length - 1,
                   itemBuilder: (context, index) {
                     final article = newsArticles[index + 1];
-                    return Card(
-                      elevation: 5,
-                      child: Row(
-                        children: [
-                          // print('Afficher les détails de ${article["title"]}');
-                          ClipRRect(
-                            borderRadius:
-                                const BorderRadius.all(Radius.circular(15)),
-                            child: Image.asset(article["image"]!),
-                          ),
-                          Gap(2.w),
-                          Expanded(
-                            child: Text(
-                              article["title"]!,
-                              style: TextStyle(
-                                color: appBlack,
-                                fontSize: 18,
-                                fontWeight: FontWeight.normal,
+                    return GestureDetector(
+                      onTap: () => showBarModalBottomSheet(
+                        expand: true,
+                        context: context,
+                        barrierColor: appColor,
+                        builder: (context) => DetailActualitePage(
+                          image: article["image"]!,
+                          titre: article["title"]!,
+                          contenu: article["content"]!,
+                        ),
+                      ),
+                      child: Card(
+                        elevation: 5,
+                        child: Row(
+                          children: [
+                            // print('Afficher les détails de ${article["title"]}');
+                            ClipRRect(
+                              borderRadius:
+                                  const BorderRadius.all(Radius.circular(15)),
+                              child: Image.asset(article["image"]!),
+                            ),
+                            Gap(2.w),
+                            Expanded(
+                              child: Text(
+                                article["title"]!,
+                                style: TextStyle(
+                                  color: appBlack,
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.normal,
+                                ),
                               ),
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
                     );
                   },
