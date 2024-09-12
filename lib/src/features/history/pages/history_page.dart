@@ -1,3 +1,4 @@
+import 'package:easy_date_timeline/easy_date_timeline.dart';
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
@@ -22,6 +23,20 @@ class _HistoryPageState extends State<HistoryPage> {
           padding: EdgeInsets.all(4.w),
           child: Column(
             children: [
+              EasyDateTimeLine(
+                initialDate: DateTime.now(),
+                onDateChange: (selectedDate) {
+                  //`selectedDate` the new date selected.
+                },
+                activeColor: appColor,
+                dayProps: EasyDayProps(
+                  height: 56,
+                  dayStructure: DayStructure.dayNumDayStr,
+                  todayHighlightStyle: TodayHighlightStyle.withBackground,
+                  todayHighlightColor: appOrange,
+                ),
+              ),
+              Gap(3.h),
               GestureDetector(
                 onTap: () => showBarModalBottomSheet(
                   expand: true,
