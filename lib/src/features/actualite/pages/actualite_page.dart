@@ -41,7 +41,7 @@ class _ActualitePageState extends State<ActualitePage> {
                   expand: true,
                   context: context,
                   barrierColor: appColor,
-                  builder: (context) => DetailActualitePage(
+                  builder: (context) => DetailNewsPage(
                     image: newsArticles[0]["image"]!,
                     titre: newsArticles[0]["title"]!,
                     contenu: newsArticles[0]["content"]!,
@@ -87,7 +87,7 @@ class _ActualitePageState extends State<ActualitePage> {
                         expand: true,
                         context: context,
                         barrierColor: appColor,
-                        builder: (context) => DetailActualitePage(
+                        builder: (context) => DetailNewsPage(
                           image: article["image"]!,
                           titre: article["title"]!,
                           contenu: article["content"]!,

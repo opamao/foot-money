@@ -4,12 +4,12 @@ import 'package:sizer/sizer.dart';
 
 import '../../../themes/themes.dart';
 
-class DetailActualitePage extends StatefulWidget {
+class DetailNewsPage extends StatefulWidget {
   String? image;
   String? titre;
   String? contenu;
 
-  DetailActualitePage({
+  DetailNewsPage({
     super.key,
     this.image,
     this.titre,
@@ -17,10 +17,10 @@ class DetailActualitePage extends StatefulWidget {
   });
 
   @override
-  State<DetailActualitePage> createState() => _DetailActualitePageState();
+  State<DetailNewsPage> createState() => _DetailNewsPageState();
 }
 
-class _DetailActualitePageState extends State<DetailActualitePage> {
+class _DetailNewsPageState extends State<DetailNewsPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
