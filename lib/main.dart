@@ -5,8 +5,11 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:sizer/sizer.dart';
 
 import 'constants/constants.dart';
+import 'utils/utilis.dart';
 
-void main() {
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await SharedPreferencesHelper().init();
   runApp(const MyApp());
 }
 

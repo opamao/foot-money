@@ -1,9 +1,14 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:footmoney/src/themes/themes.dart';
 import 'package:gap/gap.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 import 'package:sizer/sizer.dart';
+import 'package:http/http.dart' as http;
 
+import '../../../../constants/constants.dart';
+import '../../../../models/news/news_model.dart';
 import '../actualite.dart';
 
 class ActualitePage extends StatefulWidget {
@@ -14,102 +19,84 @@ class ActualitePage extends StatefulWidget {
 }
 
 class _ActualitePageState extends State<ActualitePage> {
-  final List<Map<String, String>> newsArticles = [
-    {
-      "title":
-          "Cameroun-Namibie : la Fecafoot dévoile les compos, le staff bloqué",
-      "content": "Détails de l'article 1",
-      "image": "assets/images/actualite1.jpeg"
-    },
-    {
-      "title": "Sénégal : El-Hadji Diouf réagit aux sifflets",
-      "content": "Détails de l'article 2",
-      "image": "assets/images/actu2.jpeg"
-    },
-  ];
+  Future<List<NewsModel>> fetchData() async {
+    var url = Uri.parse(ApiUrls.getListNewsUrl);
+
+    final response = await http.get(url);
+
+    if (response.statusCode == 200) {
+      final List<dynamic> jsonResponse = json.decode(response.body);
+      return jsonResponse.map((data) => NewsModel.fromJson(data)).toList();
+    } else {
+      throw Exception("Une erreur s'est produite");
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: SafeArea(
-        child: Padding(
-          padding: EdgeInsets.all(4.w),
-          child: Column(
-            children: [
-              GestureDetector(
-                onTap: () => showBarModalBottomSheet(
-                  expand: true,
-                  context: context,
-                  barrierColor: appColor,
-                  builder: (context) => DetailNewsPage(
-                    image: newsArticles[0]["image"]!,
-                    titre: newsArticles[0]["title"]!,
-                    contenu: newsArticles[0]["content"]!,
-                  ),
-                ),
-                child: Card(
-                  elevation: 5,
-                  child: Column(
-                    children: [
-                      ClipRRect(
-                        borderRadius:
-                            const BorderRadius.all(Radius.circular(15)),
-                        child: Image.asset(
-                          newsArticles[0]["image"]!,
-                          height: 219,
-                          width: double.infinity,
-                          fit: BoxFit.cover,
-                        ),
-                      ),
-                      Padding(
-                        padding: EdgeInsets.all(2.w),
-                        child: Text(
-                          newsArticles[0]["title"]!,
-                          style: TextStyle(
-                            color: appBlack,
-                            fontSize: 20,
-                            fontWeight: FontWeight.normal,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-              Gap(3.h),
-              Expanded(
-                child: ListView.builder(
-                  itemCount: newsArticles.length - 1,
-                  itemBuilder: (context, index) {
-                    final article = newsArticles[index + 1];
-                    return GestureDetector(
+        child: FutureBuilder<List<NewsModel>>(
+          future: fetchData(),
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return const Center(
+                child: CircularProgressIndicator(),
+              );
+            } else if (snapshot.hasError) {
+              return Text(snapshot.error.toString());
+            } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+              return const Center(
+                child: Text('Pass de media disponible.'),
+              );
+            } else {
+              return Padding(
+                padding: EdgeInsets.all(4.w),
+                child: Column(
+                  children: [
+                    GestureDetector(
                       onTap: () => showBarModalBottomSheet(
                         expand: true,
                         context: context,
                         barrierColor: appColor,
                         builder: (context) => DetailNewsPage(
-                          image: article["image"]!,
-                          titre: article["title"]!,
-                          contenu: article["content"]!,
+                          news: snapshot.data![0],
                         ),
                       ),
                       child: Card(
                         elevation: 5,
-                        child: Row(
+                        child: Column(
                           children: [
-                            // print('Afficher les détails de ${article["title"]}');
                             ClipRRect(
                               borderRadius:
                                   const BorderRadius.all(Radius.circular(15)),
-                              child: Image.asset(article["image"]!),
+                              child: Image.network(
+                                snapshot.data![0].photoNews!,
+                                height: 219,
+                                width: double.infinity,
+                                fit: BoxFit.cover,
+                                errorBuilder: (context, error, stackTrace) => const Icon(Icons.error),
+                                loadingBuilder: (context, child, loadingProgress) {
+                                  if (loadingProgress == null) {
+                                    return child;
+                                  }
+                                  return Center(
+                                    child: CircularProgressIndicator(
+                                      value: loadingProgress.expectedTotalBytes != null
+                                          ? loadingProgress.cumulativeBytesLoaded / loadingProgress.expectedTotalBytes!
+                                          : null,
+                                    ),
+                                  );
+                                },
+                              ),
                             ),
-                            Gap(2.w),
-                            Expanded(
+                            Padding(
+                              padding: EdgeInsets.all(2.w),
                               child: Text(
-                                article["title"]!,
+                                snapshot.data![0].titreNews!,
                                 style: TextStyle(
                                   color: appBlack,
-                                  fontSize: 18,
+                                  fontSize: 20,
                                   fontWeight: FontWeight.normal,
                                 ),
                               ),
@@ -117,12 +104,71 @@ class _ActualitePageState extends State<ActualitePage> {
                           ],
                         ),
                       ),
-                    );
-                  },
+                    ),
+                    Gap(3.h),
+                    Expanded(
+                      child: ListView.builder(
+                        itemCount: snapshot.data!.length - 1,
+                        itemBuilder: (context, index) {
+                          final article = snapshot.data![index + 1];
+                          return GestureDetector(
+                            onTap: () => showBarModalBottomSheet(
+                              expand: true,
+                              context: context,
+                              barrierColor: appColor,
+                              builder: (context) => DetailNewsPage(
+                                news: article,
+                              ),
+                            ),
+                            child: Card(
+                              elevation: 5,
+                              child: Row(
+                                children: [
+                                  ClipRRect(
+                                    borderRadius: const BorderRadius.all(
+                                      Radius.circular(15),
+                                    ),
+                                    child: Image.network(
+                                      article.photoNews!,
+                                      height: 7.h,
+                                      errorBuilder: (context, error, stackTrace) => const Icon(Icons.error),
+                                      loadingBuilder: (context, child, loadingProgress) {
+                                        if (loadingProgress == null) {
+                                          return child;
+                                        }
+                                        return Center(
+                                          child: CircularProgressIndicator(
+                                            value: loadingProgress.expectedTotalBytes != null
+                                                ? loadingProgress.cumulativeBytesLoaded / loadingProgress.expectedTotalBytes!
+                                                : null,
+                                          ),
+                                        );
+                                      },
+                                    ),
+                                  ),
+                                  Gap(2.w),
+                                  Expanded(
+                                    child: Text(
+                                      article.titreNews!,
+                                      style: TextStyle(
+                                        color: appBlack,
+                                        fontSize: 18,
+                                        fontWeight: FontWeight.normal,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+                  ],
                 ),
-              ),
-            ],
-          ),
+              );
+            }
+          },
         ),
       ),
     );

@@ -41,7 +41,7 @@ class InputText extends StatelessWidget {
     return Container(
       decoration: BoxDecoration(
         border: borderColor == null ? Border.all(color: appBlack) : null,
-        borderRadius: BorderRadius.circular(2.w),
+        borderRadius: BorderRadius.circular(3.w),
       ),
       //padding: EdgeInsets.symmetric(horizontal: 2.w),
       child: TextFormField(

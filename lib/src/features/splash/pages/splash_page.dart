@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../../constants/constants.dart';
+import '../../../../utils/utilis.dart';
 import '../../../themes/themes.dart';
 import '../../intro/intro.dart';
-import '../../login/login.dart';
+import '../../menus/menus.dart';
 
 class SplashPage extends StatefulWidget {
   const SplashPage({super.key});
@@ -37,12 +37,12 @@ class _SplashPageState extends State<SplashPage> {
   }
 
   Future<void> _navigateToNextScreen() async {
-    SharedPreferences pref = await SharedPreferences.getInstance();
-    String? val = pref.getString("identifiant");
+    final SharedPreferencesHelper prefsHelper = SharedPreferencesHelper();
+    String? val = prefsHelper.getString("identifiant");
     if (val != null) {
       Navigator.of(context).pushReplacement(
         MaterialPageRoute(
-          builder: (context) => const LoginPage(),
+          builder: (context) => const MenuPage(),
         ),
       );
     } else {

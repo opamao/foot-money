@@ -1,10 +1,14 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:footmoney/constants/constants.dart';
 import 'package:footmoney/src/themes/themes.dart';
 import 'package:gap/gap.dart';
 import 'package:intl_phone_number_input/intl_phone_number_input.dart';
 import 'package:sizer/sizer.dart';
+import 'package:http/http.dart' as http;
 
+import '../../../../utils/utilis.dart';
 import '../../../widgets/widgets.dart';
 import '../../forgot/forgot.dart';
 import '../../menus/menus.dart';
@@ -19,15 +23,17 @@ class LoginPage extends StatefulWidget {
 
 class _LoginPageState extends State<LoginPage> {
   final _formKey = GlobalKey<FormState>();
+  bool _obscure = true;
 
   var login = TextEditingController();
+  var password = TextEditingController();
 
   String phoneInicator = "";
   String initialCountry = 'CI';
   PhoneNumber number = PhoneNumber(isoCode: 'CI');
 
   final _snackBar = const SnackBar(
-    content: Text("Veuillez saisir votre numéro de téléphone"),
+    content: Text("Tous les champs sont obligatoires"),
     backgroundColor: Colors.red,
   );
 
@@ -61,7 +67,7 @@ class _LoginPageState extends State<LoginPage> {
                             padding: EdgeInsets.only(left: 4.w),
                             decoration: BoxDecoration(
                               color: appWhite,
-                              borderRadius: BorderRadius.circular(15),
+                              borderRadius: BorderRadius.circular(3.w),
                               border: Border.all(),
                             ),
                             child: InternationalPhoneNumberInput(
@@ -72,7 +78,8 @@ class _LoginPageState extends State<LoginPage> {
                               errorMessage: "Le numéro est invalide",
                               hintText: "Numéro de téléphone",
                               selectorConfig: const SelectorConfig(
-                                selectorType: PhoneInputSelectorType.BOTTOM_SHEET,
+                                selectorType:
+                                    PhoneInputSelectorType.BOTTOM_SHEET,
                               ),
                               ignoreBlank: false,
                               autoValidateMode: AutovalidateMode.disabled,
@@ -82,7 +89,8 @@ class _LoginPageState extends State<LoginPage> {
                               initialValue: number,
                               textFieldController: login,
                               formatInput: true,
-                              keyboardType: const TextInputType.numberWithOptions(
+                              keyboardType:
+                                  const TextInputType.numberWithOptions(
                                 signed: true,
                                 decimal: true,
                               ),
@@ -91,6 +99,24 @@ class _LoginPageState extends State<LoginPage> {
                               ),
                               onSaved: (PhoneNumber number) {},
                             ),
+                          ),
+                          Gap(2.h),
+                          InputPassword(
+                            hintText: "Mot de passe",
+                            controller: password,
+                            validatorMessage:
+                                "Votre mot de passe est obligatoire",
+                            suffixIcon: IconButton(
+                                icon: Icon(
+                                  _obscure
+                                      ? Icons.visibility_off
+                                      : Icons.visibility,
+                                ),
+                                onPressed: () {
+                                  setState(() {
+                                    _obscure = !_obscure;
+                                  });
+                                }),
                           ),
                           Gap(1.h),
                           TextButton(
@@ -118,12 +144,7 @@ class _LoginPageState extends State<LoginPage> {
                             AppConstants.btnLogin,
                             onPressed: () async {
                               if (_formKey.currentState!.validate()) {
-                                Navigator.of(context).pushAndRemoveUntil(
-                                  MaterialPageRoute(
-                                    builder: (context) => const MenuPage(),
-                                  ),
-                                      (route) => false,
-                                );
+                                await loginUser(context);
                               } else {
                                 ScaffoldMessenger.of(context)
                                     .showSnackBar(_snackBar);
@@ -162,5 +183,93 @@ class _LoginPageState extends State<LoginPage> {
         ),
       ),
     );
+  }
+
+  Future<void> loginUser(BuildContext context) async {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          content: Center(
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const CircularProgressIndicator(),
+                Text(
+                  "Authentification...",
+                  style: TextStyle(
+                    color: appColor,
+                    fontStyle: FontStyle.normal,
+                    fontWeight: FontWeight.w300,
+                    fontSize: 12,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+
+    final http.Response response = await http.post(
+      Uri.parse(ApiUrls.postLoginUrl),
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({'login': phoneInicator, 'password': password.text}),
+    );
+
+    final Map<String, dynamic> responseData = jsonDecode(response.body);
+
+    if (response.statusCode == 200) {
+      final SharedPreferencesHelper prefsHelper = SharedPreferencesHelper();
+      await prefsHelper.saveString('identifiant', responseData['identifiant']);
+      await prefsHelper.saveString('nom', responseData['nom']);
+      await prefsHelper.saveString('prenom', responseData['prenom']);
+      await prefsHelper.saveString('phone', responseData['phone']);
+      await prefsHelper.saveString('email', responseData['email']);
+      await prefsHelper.saveString('photo', responseData['photo'] ?? '');
+
+      Navigator.of(context).pop();
+
+      Navigator.of(context).pushAndRemoveUntil(
+        MaterialPageRoute(
+          builder: (context) => const MenuPage(),
+        ),
+        (route) => false,
+      );
+    } else {
+      await showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Center(
+                  child: Text(
+                    responseData['message'],
+                    style: TextStyle(
+                      color: appRed,
+                      fontStyle: FontStyle.normal,
+                      fontWeight: FontWeight.w300,
+                      fontSize: 12,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+                child: const Text("OK"),
+              )
+            ],
+          );
+        },
+      );
+    }
   }
 }
