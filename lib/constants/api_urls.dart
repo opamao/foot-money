@@ -19,4 +19,7 @@ class ApiUrls {
   static const String getStateVoteUrl = "$baseUrl/cumulVote/"; // mettre ID matchdevant
   static const String postAddVoteUrl = "$baseUrl/vote";
   static const String postAddDonUrl = "$baseUrl/dons";
+
+  // Matchs
+  static const String getMatchUrl = "$baseUrl/matchs";
 }
