@@ -4,6 +4,7 @@ import 'package:easy_date_timeline/easy_date_timeline.dart';
 import 'package:flutter/material.dart';
 import 'package:footmoney/src/themes/themes.dart';
 import 'package:gap/gap.dart';
+import 'package:intl/intl.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 import 'package:sizer/sizer.dart';
 import 'package:http/http.dart' as http;
@@ -74,12 +75,16 @@ class _HomePageState extends State<HomePage> {
                           itemCount: snapshot.data!.length,
                           itemBuilder: (context, index) {
                             final listMatch = snapshot.data![index];
+                            DateTime parsedTime = DateFormat("HH:mm:ss").parse(listMatch.heure!);
+                            String formattedTime = DateFormat("HH:mm").format(parsedTime);
                           return GestureDetector(
                             onTap: () => showBarModalBottomSheet(
                               expand: true,
                               context: context,
                               barrierColor: appColor,
-                              builder: (context) => const DetailHomePage(),
+                              builder: (context) => DetailHomePage(
+                                match: listMatch,
+                              ),
                             ),
                             child: Card(
                               elevation: 2,
@@ -153,7 +158,7 @@ class _HomePageState extends State<HomePage> {
                                         ),
                                         Gap(2.w),
                                         Text(
-                                          "15:00",
+                                          formattedTime,
                                           style: TextStyle(
                                             color: appBlack,
                                             fontWeight: FontWeight.normal,
@@ -189,6 +194,15 @@ class _HomePageState extends State<HomePage> {
                                           ),
                                         ),
                                       ],
+                                    ),
+                                    Text(
+                                      listMatch.libelleStade!,
+                                      maxLines: 1,
+                                      style: TextStyle(
+                                        color: appBlack,
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 12,
+                                      ),
                                     ),
                                   ],
                                 ),

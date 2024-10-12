@@ -1,32 +1,27 @@
 import 'package:flutter/material.dart';
+import 'package:footmoney/models/matchs/list_players_model.dart';
 import 'package:gap/gap.dart';
 import 'package:sizer/sizer.dart';
 
 import '../../../themes/themes.dart';
 
 class DetalJoueurPage extends StatefulWidget {
-  const DetalJoueurPage({super.key});
+  ListPlayers? joueur;
+  String? club;
+  String? clubLogo;
+
+  DetalJoueurPage({
+    super.key,
+    this.joueur,
+    this.club,
+    this.clubLogo,
+  });
 
   @override
   State<DetalJoueurPage> createState() => _DetalJoueurPageState();
 }
 
-class _DetalJoueurPageState extends State<DetalJoueurPage>
-    with TickerProviderStateMixin {
-  late final TabController _tabController;
-
-  @override
-  void initState() {
-    super.initState();
-    _tabController = TabController(length: 3, vsync: this);
-  }
-
-  @override
-  void dispose() {
-    _tabController.dispose();
-    super.dispose();
-  }
-
+class _DetalJoueurPageState extends State<DetalJoueurPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -58,16 +53,41 @@ class _DetalJoueurPageState extends State<DetalJoueurPage>
               ),
               Gap(2.h),
               ListTile(
-                leading: ClipRRect(
-                  borderRadius: BorderRadius.circular(15),
-                  child: Image.asset(
-                    "assets/images/joueur.png",
-                    height: 76,
-                    width: 50,
-                  ),
-                ),
+                leading: widget.joueur!.photoJoue! == ""
+                    ? ClipRRect(
+                        borderRadius: BorderRadius.circular(3.w),
+                        child: Image.asset(
+                          "assets/images/ligue.png",
+                          height: 76,
+                          width: 50,
+                        ),
+                      )
+                    : ClipRRect(
+                        borderRadius: BorderRadius.circular(3.w),
+                        child: Image.network(
+                          widget.joueur!.photoJoue!,
+                          height: 76,
+                          width: 50,
+                          errorBuilder: (context, error, stackTrace) =>
+                              const Icon(Icons.error),
+                          loadingBuilder: (context, child, loadingProgress) {
+                            if (loadingProgress == null) {
+                              return child;
+                            }
+                            return Center(
+                              child: CircularProgressIndicator(
+                                value: loadingProgress.expectedTotalBytes !=
+                                        null
+                                    ? loadingProgress.cumulativeBytesLoaded /
+                                        loadingProgress.expectedTotalBytes!
+                                    : null,
+                              ),
+                            );
+                          },
+                        ),
+                      ),
                 title: Text(
-                  "Coulibaly Simon",
+                  "${widget.joueur!.nomJoue!} ${widget.joueur!.prenomJoue!}",
                   style: TextStyle(
                     color: appBlack,
                     fontSize: 16,
@@ -75,241 +95,79 @@ class _DetalJoueurPageState extends State<DetalJoueurPage>
                   ),
                 ),
                 subtitle: Text(
-                  "Age: 27 (11.10.1997)",
+                  "Naissance: ${widget.joueur!.naissanceJoue!}",
                   style: TextStyle(
                     color: appSub,
                     fontSize: 14,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
-              ),
-              const Divider(),
-              ListTile(
-                leading: Image.asset(
-                  "assets/images/africa.png",
-                  height: 46,
-                  width: 50,
-                ),
-                title: Text(
-                  "Africa Sport",
-                  style: TextStyle(
-                    color: appBlack,
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                subtitle: Text(
-                  "Contrat 21.12.2028",
-                  style: TextStyle(
-                    color: appSub,
-                    fontSize: 14,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                trailing: Text(
-                  "Défenseur",
-                  style: TextStyle(
-                    color: appSub,
-                    fontSize: 14,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ),
-              const Divider(),
-              TabBar(
-                controller: _tabController,
-                tabs: const <Widget>[
-                  Tab(text: "Matchs"),
-                  Tab(text: "Carrière"),
-                  Tab(text: "Transferts"),
-                ],
-              ),
-              Expanded(
-                child: TabBarView(
-                  controller: _tabController,
-                  children: <Widget>[
-                    ListView.builder(
-                      itemCount: 2,
-                      itemBuilder: (context, index) {
-                        return ListTile(
-                          leading: Text(
-                            "06.09\n2024",
-                            textAlign: TextAlign.center,
-                            style: TextStyle(
-                              color: appSub,
-                              fontSize: 14,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          title: Row(
-                            children: [
-                              Image.asset(
-                                "assets/images/africa.png",
-                                height: 20,
-                                width: 20,
-                              ),
-                              Text(
-                                "Africa Sport",
-                                style: TextStyle(
-                                  color: appBlack,
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            ],
-                          ),
-                          subtitle: Row(
-                            children: [
-                              Image.asset(
-                                "assets/images/olympique.png",
-                                height: 20,
-                                width: 20,
-                              ),
-                              Text(
-                                "Olympique",
-                                style: TextStyle(
-                                  color: appBlack,
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            ],
-                          ),
-                          trailing: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Text(
-                                "2\n0",
-                                style: TextStyle(
-                                  color: appRed,
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                              Gap(2.w),
-                              Container(
-                                padding: EdgeInsets.all(2.w),
-                                decoration: BoxDecoration(
-                                  color: appColor,
-                                  borderRadius: BorderRadius.circular(8),
-                                ),
-                                child: Text(
-                                  "V",
-                                  style: TextStyle(
-                                    color: appWhite,
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        );
-                      },
+                trailing: Stack(
+                  alignment: Alignment.center,
+                  children: [
+                    Image.asset(
+                      'assets/images/maillotone.png',
+                      width: 30,
+                      height: 30,
                     ),
-                    ListView.builder(
-                      itemCount: 2,
-                      itemBuilder: (context, index) {
-                        return ListTile(
-                          leading: Text(
-                            "2023\n2024",
-                            textAlign: TextAlign.center,
-                            style: TextStyle(
-                              color: appSub,
-                              fontSize: 14,
-                              fontWeight: FontWeight.bold,
-                            ),
+                    Text(
+                      widget.joueur!.dossardJoue!,
+                      style: TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.bold,
+                        color: appOrange,
+                        shadows: [
+                          Shadow(
+                            blurRadius: 5,
+                            color: appColor.withOpacity(0.8),
+                            offset: const Offset(1, 2),
                           ),
-                          title: Row(
-                            children: [
-                              Image.asset(
-                                "assets/images/africa.png",
-                                height: 20,
-                                width: 20,
-                              ),
-                              Text(
-                                "Africa Sport",
-                                style: TextStyle(
-                                  color: appBlack,
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            ],
-                          ),
-                          trailing: Text(
-                            "3e",
-                            style: TextStyle(
-                              color: appRed,
-                              fontSize: 14,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        );
-                      },
-                    ),
-                    ListView.builder(
-                      itemCount: 2,
-                      itemBuilder: (context, index) {
-                        return ListTile(
-                          leading: Text(
-                            "06.09\n2024",
-                            textAlign: TextAlign.center,
-                            style: TextStyle(
-                              color: appSub,
-                              fontSize: 14,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          title: Row(
-                            children: [
-                              Image.asset(
-                                "assets/images/olympique.png",
-                                height: 20,
-                                width: 20,
-                              ),
-                              Text(
-                                "Olympique",
-                                style: TextStyle(
-                                  color: appBlack,
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            ],
-                          ),
-                          subtitle: Text(
-                            "Transfert (15M)",
-                            style: TextStyle(
-                              color: appSub,
-                              fontSize: 14,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          trailing: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Image.asset(
-                                "assets/images/africa.png",
-                                height: 20,
-                                width: 20,
-                              ),
-                              Text(
-                                "Africa Sport",
-                                style: TextStyle(
-                                  color: appBlack,
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            ],
-                          ),
-                        );
-                      },
+                        ],
+                      ),
                     ),
                   ],
                 ),
               ),
+              const Divider(),
+              ListTile(
+                leading: Image.network(
+                  widget.clubLogo!,
+                  height: 46,
+                  width: 50,
+                  errorBuilder: (context, error, stackTrace) =>
+                      const Icon(Icons.error),
+                  loadingBuilder: (context, child, loadingProgress) {
+                    if (loadingProgress == null) {
+                      return child;
+                    }
+                    return Center(
+                      child: CircularProgressIndicator(
+                        value: loadingProgress.expectedTotalBytes != null
+                            ? loadingProgress.cumulativeBytesLoaded /
+                                loadingProgress.expectedTotalBytes!
+                            : null,
+                      ),
+                    );
+                  },
+                ),
+                title: Text(
+                  widget.club!,
+                  style: TextStyle(
+                    color: appBlack,
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                trailing: Text(
+                  widget.joueur!.posteJoue!,
+                  style: TextStyle(
+                    color: appSub,
+                    fontSize: 14,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+              const Divider(),
             ],
           ),
         ),
