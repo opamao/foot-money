@@ -13,7 +13,6 @@ import '../../../../constants/constants.dart';
 import '../../../../models/matchs/list_players_model.dart';
 import '../../../../utils/utilis.dart';
 import '../../../themes/themes.dart';
-import '../../../widgets/widgets.dart';
 import '../home.dart';
 
 class DetailHomePage extends StatefulWidget {

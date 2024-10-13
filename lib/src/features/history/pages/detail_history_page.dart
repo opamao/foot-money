@@ -1,36 +1,69 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
+import 'package:footmoney/models/matchs/list_match_model.dart';
 import 'package:gap/gap.dart';
+import 'package:intl/intl.dart';
 import 'package:pie_chart/pie_chart.dart';
 import 'package:sizer/sizer.dart';
+import 'package:http/http.dart' as http;
 
+import '../../../../constants/constants.dart';
 import '../../../themes/themes.dart';
 
 class DetailHistoryPage extends StatefulWidget {
-  const DetailHistoryPage({super.key});
+  MatchModel? match;
+
+  DetailHistoryPage({
+    super.key,
+    this.match,
+  });
 
   @override
   State<DetailHistoryPage> createState() => _DetailHistoryPageState();
 }
 
 class _DetailHistoryPageState extends State<DetailHistoryPage> {
+  Map<String, double> dataMap = {};
 
-  final dataMap = <String, double>{
-    "Seko": 5,
-    "Fofana": 3,
-    "Isaac": 2,
-    "Molare": 2,
-  };
+  @override
+  void initState() {
+    super.initState();
+    fetchStatesVotes();
+  }
+
+  Future<void> fetchStatesVotes() async {
+    try {
+      final response = await http.get(
+          Uri.parse("${ApiUrls.getStateVoteUrl}${widget.match!.idMatch!}"));
+
+      if (response.statusCode == 200) {
+        Map<String, dynamic> jsonResponse = json.decode(response.body);
+        setState(() {
+          dataMap =
+              jsonResponse.map((key, value) => MapEntry(key, value.toDouble()));
+        });
+      } else {
+        print('Erreur lors de la récupération des données');
+      }
+    } catch (e) {
+      print('Exception: $e');
+    }
+  }
 
   final colorList = <Color>[
+    const Color(0xff009D48),
     const Color(0xfffdcb6e),
     const Color(0xff0984e3),
-    const Color(0xfffd79a8),
-    const Color(0xffe17055),
     const Color(0xff6c5ce7),
+    const Color(0xffe17055),
   ];
 
   @override
   Widget build(BuildContext context) {
+    DateTime parsedTime = DateFormat("HH:mm:ss").parse(widget.match!.heure!);
+    String formattedTime = DateFormat("HH:mm").format(parsedTime);
+
     return Scaffold(
       body: SafeArea(
         child: Padding(
@@ -49,7 +82,7 @@ class _DetailHistoryPageState extends State<DetailHistoryPage> {
                   ),
                   Gap(2.w),
                   Text(
-                    "Ligue 1 - Journée 1",
+                    "Ligue 1 - Journée ${widget.match!.journee!}",
                     style: TextStyle(
                       color: appBlack,
                       fontWeight: FontWeight.w300,
@@ -62,82 +95,128 @@ class _DetailHistoryPageState extends State<DetailHistoryPage> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: [
-                  Text(
-                    "Africa ",
-                    style: TextStyle(
-                      color: appBlack,
-                      fontWeight: FontWeight.normal,
-                      fontSize: 18,
+                  Expanded(
+                    child: Text(
+                      widget.match!.equipeOne!,
+                      style: TextStyle(
+                        color: appBlack,
+                        fontWeight: FontWeight.normal,
+                        fontSize: 14,
+                      ),
                     ),
                   ),
-                  Image.asset(
-                    "assets/images/africa.png",
+                  Image.network(
+                    widget.match!.equipeOneLogo!,
                     height: 25,
                     width: 25,
+                    errorBuilder: (context, error, stackTrace) =>
+                    const Icon(Icons.error),
+                    loadingBuilder: (context, child, loadingProgress) {
+                      if (loadingProgress == null) {
+                        return child;
+                      }
+                      return Center(
+                        child: CircularProgressIndicator(
+                          value: loadingProgress.expectedTotalBytes != null
+                              ? loadingProgress.cumulativeBytesLoaded /
+                              loadingProgress.expectedTotalBytes!
+                              : null,
+                        ),
+                      );
+                    },
                   ),
                   Gap(2.w),
                   Column(
                     children: [
                       Text(
-                        "15:00",
+                        formattedTime,
                         style: TextStyle(
                           color: appBlack,
                           fontWeight: FontWeight.normal,
                           fontSize: 12,
                         ),
                       ),
-                      Text(
+                      /* Text(
                         "2 : 0",
                         style: TextStyle(
                           color: appRed,
                           fontWeight: FontWeight.bold,
                           fontSize: 12,
                         ),
-                      ),
+                      ),*/
                     ],
                   ),
                   Gap(2.w),
-                  Image.asset(
-                    "assets/images/olympique.png",
+                  Image.network(
+                    widget.match!.equipeTwoLogo!,
                     height: 25,
                     width: 25,
+                    errorBuilder: (context, error, stackTrace) =>
+                    const Icon(Icons.error),
+                    loadingBuilder: (context, child, loadingProgress) {
+                      if (loadingProgress == null) {
+                        return child;
+                      }
+                      return Center(
+                        child: CircularProgressIndicator(
+                          value: loadingProgress.expectedTotalBytes != null
+                              ? loadingProgress.cumulativeBytesLoaded /
+                              loadingProgress.expectedTotalBytes!
+                              : null,
+                        ),
+                      );
+                    },
                   ),
-                  Text(
-                    " Olympique",
-                    style: TextStyle(
-                      color: appBlack,
-                      fontWeight: FontWeight.normal,
-                      fontSize: 18,
+                  Expanded(
+                    child: Text(
+                      widget.match!.equipeTwo!,
+                      style: TextStyle(
+                        color: appBlack,
+                        fontWeight: FontWeight.normal,
+                        fontSize: 14,
+                      ),
                     ),
                   ),
                 ],
               ),
               Gap(4.h),
-              PieChart(
-                dataMap: dataMap,
-                animationDuration: const Duration(milliseconds: 800),
-                chartLegendSpacing: 32,
-                chartRadius: MediaQuery.of(context).size.width / 3.2,
-                colorList: colorList,
-                initialAngleInDegree: 0,
-                chartType: ChartType.ring,
-                ringStrokeWidth: 32,
-                centerText: "Votes",
-                legendOptions: const LegendOptions(
-                  showLegendsInRow: false,
-                  legendPosition: LegendPosition.right,
-                  showLegends: true,
-                  legendShape: BoxShape.circle,
-                  legendTextStyle: TextStyle(
-                    fontWeight: FontWeight.bold,
+              Center(
+                child: dataMap.isNotEmpty
+                    ? PieChart(
+                  dataMap: dataMap,
+                  animationDuration: const Duration(milliseconds: 800),
+                  chartLegendSpacing: 32,
+                  chartRadius: MediaQuery.of(context).size.width / 3.2,
+                  colorList: colorList,
+                  initialAngleInDegree: 0,
+                  chartType: ChartType.ring,
+                  ringStrokeWidth: 32,
+                  centerText: "Votes",
+                  legendOptions: const LegendOptions(
+                    showLegendsInRow: false,
+                    legendPosition: LegendPosition.right,
+                    showLegends: true,
+                    legendShape: BoxShape.circle,
+                    legendTextStyle: TextStyle(
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
-                ),
-                chartValuesOptions: const ChartValuesOptions(
-                  showChartValueBackground: true,
-                  showChartValues: true,
-                  showChartValuesInPercentage: false,
-                  showChartValuesOutside: true,
-                  decimalPlaces: 1,
+                  chartValuesOptions: const ChartValuesOptions(
+                    showChartValueBackground: true,
+                    showChartValues: true,
+                    showChartValuesInPercentage: false,
+                    showChartValuesOutside: true,
+                    decimalPlaces: 1,
+                  ),
+                )
+                    : Text(
+                  "Pas d'homme du macth voté",
+                  style: TextStyle(
+                    color: appRed,
+                    fontWeight: FontWeight.normal,
+                    fontSize: 14,
+                    fontStyle: FontStyle.italic,
+                  ),
                 ),
               ),
             ],

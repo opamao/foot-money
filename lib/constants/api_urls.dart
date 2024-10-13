@@ -22,5 +22,6 @@ class ApiUrls {
 
   // Matchs
   static const String getMatchUrl = "$baseUrl/matchs/";
+  static const String getHistoryUrl = "$baseUrl/history/";
   static const String getPlayerUrl = "$baseUrl/players/";
 }
