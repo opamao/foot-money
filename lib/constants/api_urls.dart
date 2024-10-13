@@ -21,6 +21,6 @@ class ApiUrls {
   static const String postAddDonUrl = "$baseUrl/dons";
 
   // Matchs
-  static const String getMatchUrl = "$baseUrl/matchs";
+  static const String getMatchUrl = "$baseUrl/matchs/";
   static const String getPlayerUrl = "$baseUrl/players/";
 }

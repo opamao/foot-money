@@ -6,6 +6,7 @@ class ListPlayers {
   String? posteJoue;
   String? photoJoue;
   String? dossardJoue;
+  int? hommeDuMatch;
 
   ListPlayers({
     this.idJoue,
@@ -15,6 +16,7 @@ class ListPlayers {
     this.posteJoue,
     this.photoJoue,
     this.dossardJoue,
+    this.hommeDuMatch,
   });
 
   ListPlayers.fromJson(Map<String, dynamic> json) {
@@ -25,6 +27,7 @@ class ListPlayers {
     posteJoue = json['poste_joue'];
     photoJoue = json['photo_joue'];
     dossardJoue = json['dossard_joue'];
+    hommeDuMatch = json['homme_du_match'];
   }
 
   Map<String, dynamic> toJson() {
@@ -36,6 +39,7 @@ class ListPlayers {
     data['poste_joue'] = posteJoue;
     data['photo_joue'] = photoJoue;
     data['dossard_joue'] = dossardJoue;
+    data['homme_du_match'] = hommeDuMatch;
     return data;
   }
 }

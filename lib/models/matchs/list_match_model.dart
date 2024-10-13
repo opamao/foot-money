@@ -12,6 +12,7 @@ class MatchModel {
   String? clubTwoId;
   String? stadeId;
   String? statut;
+  String? totalVote;
 
   MatchModel({
     this.libelleStade,
@@ -27,6 +28,7 @@ class MatchModel {
     this.clubTwoId,
     this.stadeId,
     this.statut,
+    this.totalVote,
   });
 
   MatchModel.fromJson(Map<String, dynamic> json) {
@@ -43,6 +45,7 @@ class MatchModel {
     clubTwoId = json['club_two_id'];
     stadeId = json['stade_id'];
     statut = json['statut'];
+    totalVote = json['total_votes_display'];
   }
 
   Map<String, dynamic> toJson() {
@@ -60,6 +63,7 @@ class MatchModel {
     data['club_two_id'] = clubTwoId;
     data['stade_id'] = stadeId;
     data['statut'] = statut;
+    data['total_votes_display'] = totalVote;
     return data;
   }
 }

@@ -11,6 +11,7 @@ import 'package:http/http.dart' as http;
 
 import '../../../../constants/constants.dart';
 import '../../../../models/matchs/list_players_model.dart';
+import '../../../../utils/utilis.dart';
 import '../../../themes/themes.dart';
 import '../../../widgets/widgets.dart';
 import '../home.dart';
@@ -32,11 +33,13 @@ enum LegendShape { circle, rectangle }
 class _DetailHomePageState extends State<DetailHomePage>
     with TickerProviderStateMixin {
   late final TabController _tabController;
+  Map<String, double> dataMap = {};
 
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: 2, vsync: this);
+    fetchStatesVotes();
   }
 
   @override
@@ -44,14 +47,6 @@ class _DetailHomePageState extends State<DetailHomePage>
     _tabController.dispose();
     super.dispose();
   }
-
-  final dataMap = <String, double>{
-    "Yapi": 10,
-    "Seko": 8,
-    "Fofana": 5,
-    "Isaac": 3,
-    "Molare": 2,
-  };
 
   final colorList = <Color>[
     const Color(0xff009D48),
@@ -63,31 +58,32 @@ class _DetailHomePageState extends State<DetailHomePage>
 
   String selected = "";
   String label = "";
-  bool isButtonSelected = false;
+  Map<String, bool> selectedButtons = {};
 
-  Widget customRadio(String titre, String index) {
+  Widget customRadio(String titre, String index, int etat) {
+    selectedButtons.putIfAbsent(index, () => false);
+
     return OutlinedButton(
       onPressed: () {
         setState(() {
-          if (selected == index) {
-            selected = "";
-            label = "";
-            isButtonSelected = false;
-          } else if (!isButtonSelected) {
-            selected = index;
-            label = titre;
-            isButtonSelected = true;
-          }
+          selected = index;
+          label = titre;
+          selectedButtons[index] = !selectedButtons[index]!;
+          fetchAddVotes(selected);
         });
       },
       style: OutlinedButton.styleFrom(
-        backgroundColor: (selected == index) ? Colors.transparent : appOrange,
+        backgroundColor: !(selectedButtons[index]! && etat != 1)
+            ? Colors.transparent
+            : appOrange,
         foregroundColor: appOrange,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(15),
+          borderRadius: BorderRadius.circular(3.w),
         ),
         side: BorderSide(
-          color: (selected == index) ? appOrange : Colors.transparent,
+          color: !(selectedButtons[index]! && etat != 1)
+              ? appOrange
+              : Colors.transparent,
           width: 2.0,
         ),
       ),
@@ -95,7 +91,7 @@ class _DetailHomePageState extends State<DetailHomePage>
         titre.toString(),
         textAlign: TextAlign.center,
         style: TextStyle(
-          color: (selected == index) ? appOrange : appWhite,
+          color: !(selectedButtons[index]! && etat != 1) ? appOrange : appWhite,
           fontSize: 8.sp,
           fontWeight: FontWeight.bold,
         ),
@@ -103,8 +99,169 @@ class _DetailHomePageState extends State<DetailHomePage>
     );
   }
 
+  Future<void> fetchAddVotes(String joueur) async {
+    final SharedPreferencesHelper prefsHelper = SharedPreferencesHelper();
+    String? identifiant = prefsHelper.getString("identifiant");
+
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Center(
+                child: Row(
+                  children: [
+                    const CircularProgressIndicator(),
+                    Text(
+                      "Voting...",
+                      style: TextStyle(
+                        color: appColor,
+                        fontStyle: FontStyle.normal,
+                        fontWeight: FontWeight.w300,
+                        fontSize: 12,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+
+    final http.Response response = await http.post(
+      Uri.parse(ApiUrls.postAddVoteUrl),
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({
+        'user': identifiant,
+        'joueur': joueur,
+        'match': widget.match!.idMatch!,
+      }),
+    );
+
+    final Map<String, dynamic> responseData = jsonDecode(response.body);
+
+    Navigator.pop(context);
+
+    if (response.statusCode == 200) {
+      await showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Center(
+                  child: Text(
+                    "Votre homme du match a été désigné. "
+                    "\nVoulez-vous faire un don a votre homme du match?",
+                    style: TextStyle(
+                      color: appColor,
+                      fontStyle: FontStyle.normal,
+                      fontWeight: FontWeight.w300,
+                      fontSize: 12,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                  fetchDataOne();
+                  fetchDataTwo();
+                  fetchStatesVotes();
+                },
+                child: const Text("NON"),
+              ),
+              TextButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                  fetchDataOne();
+                  fetchDataTwo();
+                  fetchStatesVotes();
+                  showBarModalBottomSheet(
+                    expand: true,
+                    context: context,
+                    barrierColor: appColor,
+                    builder: (context) => const DonsPage(),
+                  );
+                },
+                child: const Text("OUI"),
+              ),
+            ],
+          );
+        },
+      );
+    } else {
+      await showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Center(
+                  child: Text(
+                    responseData['message'],
+                    style: TextStyle(
+                      color: appRed,
+                      fontStyle: FontStyle.normal,
+                      fontWeight: FontWeight.w300,
+                      fontSize: 12,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                  fetchDataOne();
+                  fetchDataTwo();
+                  fetchStatesVotes();
+                },
+                child: const Text("OK"),
+              )
+            ],
+          );
+        },
+      );
+    }
+  }
+
+  Future<void> fetchStatesVotes() async {
+    try {
+      final response = await http.get(
+          Uri.parse("${ApiUrls.getStateVoteUrl}${widget.match!.idMatch!}"));
+
+      if (response.statusCode == 200) {
+        Map<String, dynamic> jsonResponse = json.decode(response.body);
+        setState(() {
+          dataMap =
+              jsonResponse.map((key, value) => MapEntry(key, value.toDouble()));
+        });
+      } else {
+        print('Erreur lors de la récupération des données');
+      }
+    } catch (e) {
+      print('Exception: $e');
+    }
+  }
+
   Future<List<ListPlayers>> fetchDataOne() async {
-    var url = Uri.parse("${ApiUrls.getPlayerUrl}${widget.match!.clubOneId!}");
+    final SharedPreferencesHelper prefsHelper = SharedPreferencesHelper();
+    String? identifiant = prefsHelper.getString("identifiant");
+    var url = Uri.parse(
+        "${ApiUrls.getPlayerUrl}${widget.match!.clubOneId!}/${widget.match!.idMatch!}/$identifiant");
 
     final response = await http.get(url);
 
@@ -117,7 +274,10 @@ class _DetailHomePageState extends State<DetailHomePage>
   }
 
   Future<List<ListPlayers>> fetchDataTwo() async {
-    var url = Uri.parse("${ApiUrls.getPlayerUrl}${widget.match!.clubTwoId!}");
+    final SharedPreferencesHelper prefsHelper = SharedPreferencesHelper();
+    String? identifiant = prefsHelper.getString("identifiant");
+    var url = Uri.parse(
+        "${ApiUrls.getPlayerUrl}${widget.match!.clubTwoId!}/${widget.match!.idMatch!}/$identifiant");
 
     final response = await http.get(url);
 
@@ -206,14 +366,14 @@ class _DetailHomePageState extends State<DetailHomePage>
                           fontSize: 12,
                         ),
                       ),
-                      Text(
+                     /* Text(
                         "2 : 0",
                         style: TextStyle(
                           color: appRed,
                           fontWeight: FontWeight.bold,
                           fontSize: 12,
                         ),
-                      ),
+                      ),*/
                     ],
                   ),
                   Gap(2.w),
@@ -250,44 +410,46 @@ class _DetailHomePageState extends State<DetailHomePage>
                 ],
               ),
               Gap(4.h),
-              PieChart(
-                dataMap: dataMap,
-                animationDuration: const Duration(milliseconds: 800),
-                chartLegendSpacing: 32,
-                chartRadius: MediaQuery.of(context).size.width / 3.2,
-                colorList: colorList,
-                initialAngleInDegree: 0,
-                chartType: ChartType.ring,
-                ringStrokeWidth: 32,
-                centerText: "Votes",
-                legendOptions: const LegendOptions(
-                  showLegendsInRow: false,
-                  legendPosition: LegendPosition.right,
-                  showLegends: true,
-                  legendShape: BoxShape.circle,
-                  legendTextStyle: TextStyle(
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                chartValuesOptions: const ChartValuesOptions(
-                  showChartValueBackground: true,
-                  showChartValues: true,
-                  showChartValuesInPercentage: false,
-                  showChartValuesOutside: true,
-                  decimalPlaces: 1,
-                ),
+              Center(
+                child: dataMap.isNotEmpty
+                    ? PieChart(
+                        dataMap: dataMap,
+                        animationDuration: const Duration(milliseconds: 800),
+                        chartLegendSpacing: 32,
+                        chartRadius: MediaQuery.of(context).size.width / 3.2,
+                        colorList: colorList,
+                        initialAngleInDegree: 0,
+                        chartType: ChartType.ring,
+                        ringStrokeWidth: 32,
+                        centerText: "Votes",
+                        legendOptions: const LegendOptions(
+                          showLegendsInRow: false,
+                          legendPosition: LegendPosition.right,
+                          showLegends: true,
+                          legendShape: BoxShape.circle,
+                          legendTextStyle: TextStyle(
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        chartValuesOptions: const ChartValuesOptions(
+                          showChartValueBackground: true,
+                          showChartValues: true,
+                          showChartValuesInPercentage: false,
+                          showChartValuesOutside: true,
+                          decimalPlaces: 1,
+                        ),
+                      )
+                    : Text(
+                        "Pas d'homme du macth voté",
+                        style: TextStyle(
+                          color: appRed,
+                          fontWeight: FontWeight.normal,
+                          fontSize: 14,
+                          fontStyle: FontStyle.italic,
+                        ),
+                      ),
               ),
               Gap(4.h),
-              SubmitButton(
-                AppConstants.btnDons,
-                onPressed: () => showBarModalBottomSheet(
-                  expand: true,
-                  context: context,
-                  barrierColor: appColor,
-                  builder: (context) => const DonsPage(),
-                ),
-              ),
-              Gap(2.h),
               TabBar(
                 controller: _tabController,
                 labelStyle: TextStyle(fontSize: 9.sp),
@@ -409,6 +571,7 @@ class _DetailHomePageState extends State<DetailHomePage>
                                       customRadio(
                                         "Homme du match",
                                         player.idJoue!,
+                                        player.hommeDuMatch!,
                                       ),
                                     ],
                                   ),
@@ -527,6 +690,7 @@ class _DetailHomePageState extends State<DetailHomePage>
                                       customRadio(
                                         "Homme du match",
                                         player.idJoue!,
+                                        player.hommeDuMatch!,
                                       ),
                                     ],
                                   ),

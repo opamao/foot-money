@@ -21,8 +21,11 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+  DateTime _selectedDate = DateTime.now();
+
   Future<List<MatchModel>> fetchData() async {
-    var url = Uri.parse(ApiUrls.getMatchUrl);
+    String formattedDate = DateFormat('yyyy-MM-dd').format(_selectedDate);
+    var url = Uri.parse("${ApiUrls.getMatchUrl}$formattedDate");
 
     final response = await http.get(url);
 
@@ -45,7 +48,9 @@ class _HomePageState extends State<HomePage> {
               EasyDateTimeLine(
                 initialDate: DateTime.now(),
                 onDateChange: (selectedDate) {
-                  //`selectedDate` the new date selected.
+                  setState(() {
+                    _selectedDate = selectedDate;
+                  });
                 },
                 activeColor: appColor,
                 dayProps: EasyDayProps(
@@ -67,7 +72,7 @@ class _HomePageState extends State<HomePage> {
                     return Text(snapshot.error.toString());
                   } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
                     return const Center(
-                      child: Text('Pass de media disponible.'),
+                      child: Text('Pass de match disponible.'),
                     );
                   } else {
                     return Expanded(
@@ -115,7 +120,7 @@ class _HomePageState extends State<HomePage> {
                                             borderRadius: BorderRadius.circular(15),
                                           ),
                                           child: Text(
-                                            "+15 Vote(s)",
+                                            "${listMatch.totalVote} Vote(s)",
                                             style: TextStyle(
                                               color: appBlack,
                                               fontWeight: FontWeight.w300,
