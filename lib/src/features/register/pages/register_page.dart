@@ -112,6 +112,7 @@ class _RegisterPageState extends State<RegisterPage> {
                                 child: InternationalPhoneNumberInput(
                                   onInputChanged: (PhoneNumber number) {
                                     phoneIndicator = number.phoneNumber!;
+                                    print(phoneIndicator);
                                   },
                                   onInputValidated: (bool value) {},
                                   errorMessage: "Le numéro est invalide",
@@ -191,47 +192,19 @@ class _RegisterPageState extends State<RegisterPage> {
   }
 
   Future<void> registerUser(BuildContext context) async {
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Center(
-                child: Row(
-                  children: [
-                    const CircularProgressIndicator(),
-                    Text(
-                      "Inscription...",
-                      style: TextStyle(
-                        color: appColor,
-                        fontStyle: FontStyle.normal,
-                        fontWeight: FontWeight.w300,
-                        fontSize: 12,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        );
-      },
-    );
-
     final http.Response response = await http.post(
       Uri.parse(ApiUrls.postRegisterUrl),
-      headers: {'Content-Type': 'application/json'},
-      body: jsonEncode({
+      headers: {
+        'Accept': 'application/json',
+      },
+      body: {
         'nom': name.text,
         'prenom': lastName.text,
         'email': "",
         'tel': phoneIndicator,
         'commune': commune.text,
         'password': password.text,
-      }),
+      },
     );
 
     final Map<String, dynamic> responseData = jsonDecode(response.body);

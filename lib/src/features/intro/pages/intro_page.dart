@@ -81,7 +81,7 @@ class _IntroPageState extends State<IntroPage> {
                     ),
                   ),
                   const Spacer(),
-                  FloatingActionButton(
+                  FloatingActionButton.small(
                     onPressed: () {
                       if (_pageIndex + 1 == _nbreSlides) {
                         Navigator.push(
